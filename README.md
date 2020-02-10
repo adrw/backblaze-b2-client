@@ -1,2 +1,16 @@
 # cloudron-backblaze-b2-storage
-Cloudron storage interface support of Backblaze B2
+
+Cloudron storage interface support of Backblaze B2.
+
+## Plan
+
+- [ ] Copy over Cloudron storage interface
+- [ ] Use [yakovkhalinsky/backblaze-b2](https://github.com/yakovkhalinsky/backblaze-b2) client to implement B2 interface
+- [ ] Publish on NPM
+
+## Resources
+
+- [Cloudron Forum Post](https://forum.cloudron.io/topic/1886/is-it-possible-to-implement-custom-backup-providers/8)
+- [Cloudron storage interface](https://git.cloudron.io/cloudron/box/blob/master/src/storage/interface.js)
+- [Cloudron s3 storage implementation](https://git.cloudron.io/cloudron/box/blob/master/src/storage/s3.js)
+- [Recommended Backblaze B2 node client](https://github.com/yakovkhalinsky/backblaze-b2)
