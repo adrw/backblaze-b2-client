@@ -27,15 +27,28 @@ var assert = require('assert'),
     PassThrough = require('stream').PassThrough,
     path = require('path');
 
+function removePrivateFields(apiConfig) {
+    // in-place removal of tokens and api keys with domains.SECRET_PLACEHOLDER
+    return apiConfig;
+}
+
+// eslint-disable-next-line no-unused-vars
+function injectPrivateFields(newConfig, currentConfig) {
+    // in-place injection of tokens and api keys which came in with domains.SECRET_PLACEHOLDER
+}
+
 function upload(apiConfig, backupFilePath, sourceStream, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof backupFilePath, 'string');
     assert.strictEqual(typeof sourceStream, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    debug('upload: %s', backupFilePath);
+    // Result: none
+    // sourceStream errors are handled upstream
 
-    callback(null);
+    callback(
+        new BoxError(BoxError.NOT_IMPLEMENTED, 'upload is not implemented')
+    );
 }
 
 function download(apiConfig, backupFilePath, callback) {
@@ -43,24 +56,10 @@ function download(apiConfig, backupFilePath, callback) {
     assert.strictEqual(typeof backupFilePath, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    debug('download: %s', backupFilePath);
-
+    // Result: download stream
     callback(
-        new BoxError(
-            BoxError.NOT_IMPLEMENTED,
-            'Cannot download from noop backend'
-        )
+        new BoxError(BoxError.NOT_IMPLEMENTED, 'download is not implemented')
     );
-}
-
-function listDir(apiConfig, dir, batchSize, iteratorCallback, callback) {
-    assert.strictEqual(typeof apiConfig, 'object');
-    assert.strictEqual(typeof dir, 'string');
-    assert.strictEqual(typeof batchSize, 'number');
-    assert.strictEqual(typeof iteratorCallback, 'function');
-    assert.strictEqual(typeof callback, 'function');
-
-    callback();
 }
 
 function downloadDir(apiConfig, backupFilePath, destDir) {
@@ -70,15 +69,7 @@ function downloadDir(apiConfig, backupFilePath, destDir) {
 
     var events = new EventEmitter();
     process.nextTick(function() {
-        debug('downloadDir: %s -> %s', backupFilePath, destDir);
-
-        events.emit(
-            'done',
-            new BoxError(
-                BoxError.NOT_IMPLEMENTED,
-                'Cannot download from noop backend'
-            )
-        );
+        events.emit('done', null);
     });
     return events;
 }
@@ -88,8 +79,6 @@ function copy(apiConfig, oldFilePath, newFilePath) {
     assert.strictEqual(typeof oldFilePath, 'string');
     assert.strictEqual(typeof newFilePath, 'string');
 
-    debug('copy: %s -> %s', oldFilePath, newFilePath);
-
     var events = new EventEmitter();
     process.nextTick(function() {
         events.emit('done', null);
@@ -97,25 +86,44 @@ function copy(apiConfig, oldFilePath, newFilePath) {
     return events;
 }
 
+function listDir(apiConfig, dir, batchSize, iteratorCallback, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof dir, 'string');
+    assert.strictEqual(typeof batchSize, 'number');
+    assert.strictEqual(typeof iteratorCallback, 'function');
+    assert.strictEqual(typeof callback, 'function');
+
+    callback(
+        new BoxError(BoxError.NOT_IMPLEMENTED, 'listDir is not implemented')
+    );
+}
+
 function remove(apiConfig, filename, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    debug('remove: %s', filename);
+    // Result: none
 
-    callback(null);
+    callback(
+        new BoxError(BoxError.NOT_IMPLEMENTED, 'remove is not implemented')
+    );
 }
 
 function removeDir(apiConfig, pathPrefix) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof pathPrefix, 'string');
 
-    debug('removeDir: %s', pathPrefix);
-
+    // Result: none
     var events = new EventEmitter();
     process.nextTick(function() {
-        events.emit('done', null);
+        events.emit(
+            'done',
+            new BoxError(
+                BoxError.NOT_IMPLEMENTED,
+                'removeDir is not implemented'
+            )
+        );
     });
     return events;
 }
@@ -124,12 +132,9 @@ function testConfig(apiConfig, callback) {
     assert.strictEqual(typeof apiConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    callback(null);
-}
+    // Result: none - first callback argument error if config does not pass the test
 
-function removePrivateFields(apiConfig) {
-    return apiConfig;
+    callback(
+        new BoxError(BoxError.NOT_IMPLEMENTED, 'testConfig is not implemented')
+    );
 }
-
-// eslint-disable-next-line no-unused-vars
-function injectPrivateFields(newConfig, currentConfig) {}
