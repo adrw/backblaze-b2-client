@@ -6,7 +6,7 @@ Cloudron storage interface support of Backblaze B2.
 
 - [x] Copy over Cloudron storage interface
 - [ ] Use [yakovkhalinsky/backblaze-b2](https://github.com/yakovkhalinsky/backblaze-b2) client to implement B2 interface
-- [ ] Publish on NPM
+- [x] Publish on NPM
 
 ## Resources
 

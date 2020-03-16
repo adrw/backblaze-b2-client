@@ -1,30 +1,39 @@
 {
-  "name": "cloudron-backblaze-b2-storage",
-  "description": "Use Backblaze B2 as a Cloudron storage target",
-  "version": "0.0.1",
-  "author": {
-    "name": "Andrew Alexander (adrw)"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:adrw/cloudron-backblaze-b2-storage.git"
-  },
-  "engines": {
-    "node": ">=4.0.0 <=4.1.1"
-  },
-  "dependencies": {
-    "backblaze-b2": "1.5.0",
-    "lodash": "^4.17.15"
-  },
-  "devDependencies": {
-    "@misk/prettier": "0.1.26-40"
-  },
-  "prettier": "@misk/prettier",
-  "scripts": {
-    "test": "./runTests",
-    "postmerge": "/bin/true",
-    "precommit": "/bin/true",
-    "prepush": "npm test",
-    "dashboard": "node_modules/.bin/gulp"
-  }
+    "name": "cloudron-backblaze-b2-storage",
+    "description": "Use Backblaze B2 as a Cloudron storage target",
+    "version": "0.0.1",
+    "license": "MIT",
+    "author": {
+        "name": "Andrew Alexander (adrw)"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:adrw/cloudron-backblaze-b2-storage.git"
+    },
+    "engines": {
+        "node": ">=4.0.0 <=4.1.1"
+    },
+    "dependencies": {
+        "async": "2.6.3",
+        "backblaze-b2": "1.5.0",
+        "debug": "4.1.1",
+        "dotenv": "8.2.0",
+        "lodash": "^4.17.15",
+        "lodash.chunk": "4.2.0"
+    },
+    "devDependencies": {
+        "@misk/prettier": "0.1.26-40",
+        "jest": "25.1.0"
+    },
+    "prettier": {
+        "singleQuote": true,
+        "tabWidth": 4
+    },
+    "scripts": {
+        "test": "jest",
+        "postmerge": "/bin/true",
+        "precommit": "/bin/true",
+        "prepush": "npm test",
+        "dashboard": "node_modules/.bin/gulp"
+    }
 }
