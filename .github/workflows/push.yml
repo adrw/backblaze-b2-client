@@ -21,6 +21,6 @@ jobs:
       if: github.ref == 'refs/heads/master'
       uses: mikeal/merge-release@master
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
         NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
     
