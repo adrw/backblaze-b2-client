@@ -1,91 +1,29 @@
 {
-    "name": "cloudron-backblaze-b2-storage",
-    "description": "Use Backblaze B2 as a Cloudron storage target",
-    "version": "0.0.1",
-    "author": {
-      "name": "Cloudron authors, Andrew Alexander (adrw)"
-    },
-    "repository": {
-      "type": "git",
-      "url": "git@github.com:adrw/cloudron-backblaze-b2-storage.git"
-    },
-    "engines": {
-      "node": ">=4.0.0 <=4.1.1"
-    },
-    "dependencies": {
-    //   "@google-cloud/dns": "^1.1.0",
-    //   "@google-cloud/storage": "^2.5.0",
-    //   "@sindresorhus/df": "git+https://github.com/cloudron-io/df.git#type",
-    //   "async": "^2.6.3",
-    //   "aws-sdk": "^2.610.0",
-    //   "body-parser": "^1.19.0",
-    //   "cloudron-manifestformat": "^4.0.0",
-    //   "connect": "^3.7.0",
-    //   "connect-lastmile": "^1.2.2",
-    //   "connect-timeout": "^1.9.0",
-    //   "cookie-session": "^1.4.0",
-    //   "cron": "^1.8.2",
-    //   "db-migrate": "^0.11.6",
-    //   "db-migrate-mysql": "^1.1.10",
-    //   "debug": "^4.1.1",
-    //   "dockerode": "^2.5.8",
-    //   "ejs": "^2.6.1",
-    //   "ejs-cli": "^2.1.1",
-    //   "express": "^4.17.1",
-    //   "js-yaml": "^3.13.1",
-    //   "json": "^9.0.6",
-    //   "ldapjs": "^1.0.2",
-    //   "lodash": "^4.17.15",
-    //   "lodash.chunk": "^4.2.0",
-    //   "mime": "^2.4.4",
-    //   "moment-timezone": "^0.5.27",
-    //   "morgan": "^1.9.1",
-    //   "multiparty": "^4.2.1",
-    //   "mysql": "^2.18.1",
-    //   "nodemailer": "^6.4.2",
-    //   "nodemailer-smtp-transport": "^2.7.4",
-    //   "once": "^1.4.0",
-    //   "parse-links": "^0.1.0",
-    //   "pretty-bytes": "^5.3.0",
-    //   "progress-stream": "^2.0.0",
-    //   "proxy-middleware": "^0.15.0",
-    //   "qrcode": "^1.4.4",
-    //   "readdirp": "^3.3.0",
-    //   "request": "^2.88.0",
-    //   "rimraf": "^2.6.3",
-    //   "s3-block-read-stream": "^0.5.0",
-    //   "safetydance": "^1.0.0",
-    //   "semver": "^6.1.1",
-    //   "showdown": "^1.9.1",
-    //   "speakeasy": "^2.0.0",
-    //   "split": "^1.0.1",
-    //   "superagent": "^5.2.1",
-    //   "supererror": "^0.7.2",
-    //   "tar-fs": "github:cloudron-io/tar-fs#ignore_stat_error",
-    //   "tar-stream": "^2.1.0",
-    //   "tldjs": "^2.3.1",
-    //   "underscore": "^1.9.2",
-    //   "uuid": "^3.4.0",
-    //   "validator": "^11.0.0",
-    //   "ws": "^7.2.1",
-    //   "xml2js": "^0.4.23"
-    },
-    "devDependencies": {
-    //   "expect.js": "*",
-    //   "hock": "^1.3.3",
-    //   "js2xmlparser": "^4.0.0",
-    //   "mocha": "^6.1.4",
-    //   "mock-aws-s3": "git+https://github.com/cloudron-io/mock-aws-s3.git",
-    //   "nock": "^10.0.6",
-    //   "node-sass": "^4.12.0",
-    //   "recursive-readdir": "^2.2.2"
-    },
-    "scripts": {
-      "test": "./runTests",
-      "postmerge": "/bin/true",
-      "precommit": "/bin/true",
-      "prepush": "npm test",
-      "dashboard": "node_modules/.bin/gulp"
-    }
+  "name": "cloudron-backblaze-b2-storage",
+  "description": "Use Backblaze B2 as a Cloudron storage target",
+  "version": "0.0.1",
+  "author": {
+    "name": "Andrew Alexander (adrw)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:adrw/cloudron-backblaze-b2-storage.git"
+  },
+  "engines": {
+    "node": ">=4.0.0 <=4.1.1"
+  },
+  "dependencies": {
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "@misk/prettier": "0.1.26-40"
+  },
+  "prettier": "@misk/prettier",
+  "scripts": {
+    "test": "./runTests",
+    "postmerge": "/bin/true",
+    "precommit": "/bin/true",
+    "prepush": "npm test",
+    "dashboard": "node_modules/.bin/gulp"
   }
-  
+}
