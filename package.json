@@ -14,7 +14,7 @@
         "node": ">=4.0.0 <=4.1.1"
     },
     "dependencies": {
-        "async": "2.6.3",
+        "async": "3.2.0",
         "backblaze-b2": "1.5.0",
         "connect-lastmile": "1.2.2",
         "debug": "4.1.1",
