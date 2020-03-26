@@ -24,7 +24,7 @@
         "underscore": "1.9.2"
     },
     "devDependencies": {
-        "@misk/prettier": "0.1.26-53",
+        "@misk/prettier": "0.1.26-54",
         "jest": "25.2.2"
     },
     "prettier": {
