@@ -23,6 +23,7 @@ var assert = require('assert'),
     chunk = require('lodash.chunk'),
     debug = require('debug')('cloudron-backblaze-b2-storage'),
     EventEmitter = require('events'),
+    fs = require('fs').promises,
     https = require('https'),
     PassThrough = require('stream').PassThrough,
     path = require('path');
@@ -134,7 +135,89 @@ function testConfig(apiConfig, callback) {
 
     // Result: none - first callback argument error if config does not pass the test
 
-    callback(
-        new BoxError(BoxError.NOT_IMPLEMENTED, 'testConfig is not implemented')
-    );
+    if (typeof apiConfig.applicationKeyId !== 'string')
+        return callback(
+            new BoxError(
+                BoxError.BAD_FIELD,
+                'applicationKeyId must be a string',
+                { field: 'applicationKeyId' }
+            )
+        );
+    if (typeof apiConfig.applicationKey !== 'string')
+        return callback(
+            new BoxError(
+                BoxError.BAD_FIELD,
+                'applicationKey must be a string',
+                { field: 'applicationKey' }
+            )
+        );
+    if (typeof apiConfig.bucket !== 'string')
+        return callback(
+            new BoxError(BoxError.BAD_FIELD, 'bucket must be a string', {
+                field: 'bucket'
+            })
+        );
+    // the node module seems to incorrectly accept bucket name with '/'
+    if (apiConfig.bucket.includes('/'))
+        return callback(
+            new BoxError(BoxError.BAD_FIELD, 'bucket name cannot contain "/"', {
+                field: 'bucket'
+            })
+        );
+
+    // attempt to upload and delete a file with new credentials
+    getB2Config(apiConfig, async (error, credentials) => {
+        if (error) return callback(error);
+
+        var b2 = new B2(credentials);
+        var bucketId;
+        try {
+            await b2.authorize();
+            const bucketResponse = await b2.getBucket({
+                bucketName: credentials.bucket
+            });
+            bucketId = bucketResponse.data.buckets[0].bucketId;
+        } catch (err) {
+            debug('Error getting bucket:', err);
+        }
+
+        Promise.all([
+            b2.getUploadUrl({ bucketId }),
+            fs.readFile('src/cloudron-testfile')
+        ]).then(([response, file]) => {
+            return b2
+                .uploadFile({
+                    uploadUrl: response.data.uploadUrl,
+                    uploadAuthToken: response.data.authorizationToken,
+                    fileName: 'cloudron-testfile',
+                    data: file
+                })
+                .then(uploadResponse => {
+                    console.log(
+                        `Upload /${credentials.bucket}/${uploadResponse.data.fileName}`
+                    );
+                    b2.deleteFileVersion({
+                        fileId: uploadResponse.data.fileId,
+                        fileName: uploadResponse.data.fileName
+                    }).then(deleteResponse =>
+                        console.log(
+                            `Delete /${credentials.bucket}/${deleteResponse.data}`
+                        )
+                    );
+                });
+        });
+    });
+}
+
+function getB2Config(apiConfig, callback) {
+    assert.strictEqual(typeof apiConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var credentials = {
+        applicationKeyId: apiConfig.applicationKeyId,
+        applicationKey: apiConfig.applicationKey,
+        bucket: apiConfig.bucket
+    };
+
+    callback(null, credentials);
 }
