@@ -40,6 +40,7 @@ describe("BackblazeB2Client", () => {
     bucketId
   } as IBackblazeB2ClientCredentials
 
+  // TODO add per test cleanup of uploaded test files
   // beforeEach(() => {
   //   testFiles.forEach(async ({ fileName, filePath }: any) => {
   //     const b2raw = new B2(credentials)

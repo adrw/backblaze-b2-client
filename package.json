@@ -1,7 +1,7 @@
 {
   "name": "backblaze-b2-client",
   "description": "Rich client for Backblaze B2",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "Apache-2.0",
   "author": {
     "name": "Andrew Alexander (adrw)"
@@ -49,22 +49,20 @@
     "lint": "prettier --write --config package.json \".{/src/**/,/}*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "postmerge": "/bin/true",
     "precommit": "npm run-script lint",
-    "prepush": "npm test"
+    "prepush": "npm test",
+    "prepublishOnly": "npm build && npm test"
   },
   "jest": {
     "moduleFileExtensions": [
       "ts",
-      "tsx",
       "js",
-      "json",
-      "jsx"
+      "json"
     ],
     "moduleNameMapper": {
       "^src(.*)$": "<rootDir>/src/$1",
       "^test(.*)$": "<rootDir>/test/$1"
     },
     "testEnvironment": "node",
-    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(tsx?|jsx?)$",
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     }
