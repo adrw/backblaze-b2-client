@@ -2,6 +2,8 @@
 
 A thicker client for Backblaze B2 that includes `fs` to handle uploads and extensible error handling for easier integration with other platforms.
 
+`backblaze-b2-client` [NPM](https://www.npmjs.com/package/backblaze-b2-client)
+
 See the examples directory for integration samples. The directory includes an example implementation of Cloudron storage interface to support Backblaze B2.
 
 ## Plan
