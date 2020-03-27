@@ -117,13 +117,17 @@ export const BackblazeB2Client = (
       credentials?: IBackblazeB2ClientCredentials
     ) => {},
     testCredentials: async (credentials?: IBackblazeB2ClientCredentials) => {
-      const { bucketId } = await fillInCredentials(credentials || cachedCredentials)
+      const { bucketId } = await fillInCredentials(
+        credentials || cachedCredentials
+      )
       const testFileName = "backblaze-b2-client-testfile"
-      const uploadResponse = await b2.uploadAny({
-        bucketId,
-        fileName: testFileName,
-        data: `src/${testFileName}`
-      })
+      const uploadResponse = await b2.authorize().then(() =>
+        b2.uploadAny({
+          bucketId,
+          fileName: testFileName,
+          data: `src/${testFileName}`
+        })
+      )
       const deleteResponse = await b2.deleteFileVersion({
         fileId: uploadResponse.data.fileId,
         fileName: uploadResponse.data.fileName
