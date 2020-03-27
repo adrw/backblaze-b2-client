@@ -19,7 +19,7 @@ var assert = require('assert'),
     async = require('async'),
     B2 = require('backblaze-b2'),
     // backups = require('../backups.js'),
-    BoxError = require('./cloudron/boxerror.js'),
+    BoxError = require('./boxerror.js'),
     chunk = require('lodash.chunk'),
     debug = require('debug')('cloudron-backblaze-b2-storage'),
     EventEmitter = require('events'),
@@ -44,12 +44,28 @@ function upload(apiConfig, backupFilePath, sourceStream, callback) {
     assert.strictEqual(typeof sourceStream, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    // Result: none
-    // sourceStream errors are handled upstream
+    getB2Config(apiConfig, async (error, credentials) => {
+        if (error) return callback(error);
 
-    callback(
-        new BoxError(BoxError.NOT_IMPLEMENTED, 'upload is not implemented')
-    );
+        var b2 = new B2(credentials);
+        var bucketId;
+        try {
+            await b2.authorize();
+            const bucketResponse = await b2.getBucket({
+                bucketName: credentials.bucket
+            });
+            bucketId = bucketResponse.data.buckets[0].bucketId;
+        } catch (error) {
+            callback(
+                new BoxError(
+                    BoxError.EXTERNAL_ERROR,
+                    error.message || error.code
+                )
+            ); // DO sets 'code'
+        }
+
+        uploadB2File(b2, bucketId, backupFilePath, sourceStream);
+    });
 }
 
 function download(apiConfig, backupFilePath, callback) {
@@ -177,8 +193,13 @@ function testConfig(apiConfig, callback) {
                 bucketName: credentials.bucket
             });
             bucketId = bucketResponse.data.buckets[0].bucketId;
-        } catch (err) {
-            debug('Error getting bucket:', err);
+        } catch (error) {
+            callback(
+                new BoxError(
+                    BoxError.EXTERNAL_ERROR,
+                    error.message || error.code
+                )
+            ); // DO sets 'code'
         }
 
         Promise.all([
@@ -198,13 +219,31 @@ function testConfig(apiConfig, callback) {
                     );
                     b2.deleteFileVersion({
                         fileId: uploadResponse.data.fileId,
-                        fileName: uploadResponse.data.fileName
-                    }).then(deleteResponse =>
-                        console.log(
-                            `Delete /${credentials.bucket}/${deleteResponse.data}`
+                        fileName: uploadResponse.data.fileName + '2'
+                    })
+                        .then(deleteResponse => {
+                            console.log(
+                                `Delete /${credentials.bucket}/${deleteResponse.data.fileName}`
+                            );
+                            callback();
+                        })
+                        .catch(error =>
+                            callback(
+                                new BoxError(
+                                    BoxError.EXTERNAL_ERROR,
+                                    error.message || error.code
+                                )
+                            )
+                        ); // DO sets 'code'
+                })
+                .catch(error =>
+                    callback(
+                        new BoxError(
+                            BoxError.EXTERNAL_ERROR,
+                            error.message || error.code
                         )
-                    );
-                });
+                    )
+                ); // DO sets 'code'
         });
     });
 }
@@ -216,8 +255,71 @@ function getB2Config(apiConfig, callback) {
     var credentials = {
         applicationKeyId: apiConfig.applicationKeyId,
         applicationKey: apiConfig.applicationKey,
-        bucket: apiConfig.bucket
+        bucket: apiConfig.bucket,
+        retry: {
+            retries: 5, // for additional options, see https://github.com/softonic/axios-retry
+            retryDelay: () => 20000 // constant backoff
+        }
     };
 
     callback(null, credentials);
+}
+
+async function uploadB2File(
+    b2,
+    bucketId,
+    filePath,
+    fileName,
+    multiPartSizeLimit = 5242880 // 5MB
+) {
+    let stats = fs.statSync(filePath);
+    if (stats.size > multiPartSizeLimit) {
+        let fileData = await fs.readFileAsync(filePath);
+        let fileChunks = chunks(fileData, multiPartSizeLimit);
+
+        await b2.authorize();
+
+        let largeFileData = await b2.startLargeFile({
+            bucketId,
+            fileName
+        });
+        let fileId = largeFileData.data.fileId;
+
+        /* eslint-disable arrow-body-style */
+        await Promise.all(
+            fileChunks.map((data, index) => {
+                return b2.getUploadPartUrl({ fileId: fileId }).then(urlInfo => {
+                    return b2.uploadPart({
+                        partNumber: index + 1,
+                        uploadUrl: urlInfo.data.uploadUrl,
+                        uploadAuthToken: urlInfo.data.authorizationToken,
+                        data: data
+                    });
+                });
+            })
+        );
+
+        let uploadInfo = await b2.finishLargeFile({
+            fileId: fileId,
+            partSha1Array: fileChunks.map(data => {
+                let hash = crypto.createHash('sha1');
+                hash.update(data);
+                return hash.digest('hex');
+            })
+        });
+
+        return `${uploadInfo.data.fileName}`;
+    }
+
+    await b2.authorize();
+
+    let urlInfo = await b2.getUploadUrl(bucketId);
+    let uploadInfo = await b2.uploadFile({
+        uploadUrl: urlInfo.data.uploadUrl,
+        uploadAuthToken: urlInfo.data.authorizationToken,
+        filename: fileName,
+        data: await fs.readFileAsync(filePath)
+    });
+
+    return `${uploadInfo.data.fileName}`;
 }

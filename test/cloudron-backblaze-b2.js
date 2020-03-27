@@ -14,8 +14,8 @@ describe('backblaze-b2 integration test', () => {
             applicationKey,
             bucket
         };
-        b2.testConfig(params, (error, credentials) => {
-            expect(credentials).toBe(params);
-        });
+        const testConfigResponse = b2.testConfig(params, error => error);
+        console.log(testConfigResponse);
+        expect().toBeUndefined();
     });
 });
