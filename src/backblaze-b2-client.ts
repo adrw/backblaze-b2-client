@@ -118,7 +118,35 @@ export const BackblazeB2Client = (): IBackblazeB2Client => {
     ) => {
       const b2 = new B2(credentials)
       const { bucketId } = credentials
-      const authorizeResponse = await b2.authorize()
+      await b2.authorize()
+
+      try {
+        let versions = await b2.listFileVersions({
+          bucketId,
+          startFileName: fileName,
+          maxFileCount: 1
+        })
+
+        if (versions.data.files.length >= 1) {
+          let fileId = versions.data.files[0].fileId
+
+          await b2.deleteFileVersion({
+            fileId: fileId,
+            fileName: fileName
+          })
+        }
+      } catch (e) {
+        if (
+          e.response &&
+          e.response.data &&
+          e.response.data.code &&
+          e.response.data.code == "file_not_present"
+        ) {
+          // Nothin to do, the file we wanted to delete is already gone
+        } else {
+          throw e
+        }
+      }
     },
     removeDir: async (
       credentials: IBackblazeB2ClientCredentials,

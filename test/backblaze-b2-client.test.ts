@@ -23,7 +23,7 @@ const testFiles = [
 
 describe("BackblazeB2Client", () => {
   // Set longer timeout since we're actually doing network calls
-  jest.setTimeout(10000)
+  jest.setTimeout(15000)
 
   const applicationKeyId = process.env.BACKBLAZE_B2_API_KEY_ID
   expect(applicationKeyId).toBeDefined()
@@ -115,9 +115,34 @@ describe("BackblazeB2Client", () => {
       delimiter: "",
       prefix: ""
     })
-    const file = listResponse.data.files.filter(
+    const files = listResponse.data.files.filter(
       (file: any) => file.fileName == fileName
     )
-    expect(file).toBeDefined()
+    expect(files).toHaveLength(1)
+  })
+
+  it("remove happy path", async () => {
+    const datePrefix = dayjs().format("YYYY-MM-DDTHH:mm:ss")
+    const testFile = testFiles[0]
+    const fileName = `${datePrefix}-${testFile.fileName}`
+
+    const b2 = BackblazeB2Client()
+    await b2.upload(credentials, fileName, testFile.filePath)
+
+    await b2.remove(credentials, fileName)
+
+    const b2raw = new B2(credentials)
+    await b2raw.authorize()
+    const listResponse = await b2raw.listFileNames({
+      ...credentials,
+      startFileName: fileName,
+      maxFileCount: 100,
+      delimiter: "",
+      prefix: ""
+    })
+    const files = listResponse.data.files.filter(
+      (file: any) => file.fileName == fileName
+    )
+    expect(files).toHaveLength(0)
   })
 })

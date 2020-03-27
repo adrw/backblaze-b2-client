@@ -1,7 +1,7 @@
 {
   "name": "backblaze-b2-client",
   "description": "Rich client for Backblaze B2",
-  "version": "0.0.2",
+  "version": "0.0.8",
   "license": "Apache-2.0",
   "author": {
     "name": "Andrew Alexander (adrw)"
@@ -45,7 +45,7 @@
     "start": "node dist/index.js",
     "watch": "tsc -w",
     "build": "tsc",
-    "test": "npm run-script build && jest",
+    "test": "npm build && jest",
     "lint": "prettier --write --config package.json \".{/src/**/,/}*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "postmerge": "/bin/true",
     "precommit": "npm run-script lint",
