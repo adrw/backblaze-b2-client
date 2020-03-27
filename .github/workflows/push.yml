@@ -1,29 +1,30 @@
 on: push
 name: Build and Publish
 jobs:
-    all:
-        name: Build and Publish
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@master
-            - name: Cache node_modules
-              id: cache-modules
-              uses: actions/cache@v1
-              with:
-                  path: node_modules
-                  key: ${{ runner.OS }}-build-${{ hashFiles('package.json') }}
-            - name: Build
-              if: steps.cache-modules.outputs.cache-hit != 'true'
-              run: npm install
-            - name: Test
-              run: npm test
-              env:
-                  BACKBLAZE_B2_API_KEY_ID: ${{ secrets.BACKBLAZE_B2_API_KEY_ID }}
-                  BACKBLAZE_B2_API_KEY: ${{ secrets.BACKBLAZE_B2_API_KEY }}
-                  BUCKET: ${{ secrets.BUCKET }}
-            - name: Publish
-              if: github.ref == 'refs/heads/master'
-              uses: mikeal/merge-release@master
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
-                  NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+  all:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Cache node_modules
+        id: cache-modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('package.json') }}
+      - name: Build
+        if: steps.cache-modules.outputs.cache-hit != 'true'
+        run: npm install
+      - name: Test
+        run: npm test
+        env:
+          BACKBLAZE_B2_API_KEY_ID: ${{ secrets.BACKBLAZE_B2_API_KEY_ID }}
+          BACKBLAZE_B2_API_KEY: ${{ secrets.BACKBLAZE_B2_API_KEY }}
+          BACKBLAZE_B2_BUCKET_NAME: ${{ secrets.BACKBLAZE_B2_BUCKET_NAME }}
+          BACKBLAZE_B2_BUCKET_ID: ${{ secrets.BACKBLAZE_B2_BUCKET_ID }}
+      - name: Publish
+        if: github.ref == 'refs/heads/master'
+        uses: mikeal/merge-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
