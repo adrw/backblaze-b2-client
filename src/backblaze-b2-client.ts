@@ -80,30 +80,54 @@ export const BackblazeB2Client = (): IBackblazeB2Client => {
     download: async (
       credentials: IBackblazeB2ClientCredentials,
       filePath: string
-    ) => {},
+    ) => {
+      const b2 = new B2(credentials)
+      const { bucketId } = credentials
+      const authorizeResponse = await b2.authorize()
+    },
     downloadDir: async (
       credentials: IBackblazeB2ClientCredentials,
       dirPath: string
-    ) => {},
+    ) => {
+      const b2 = new B2(credentials)
+      const { bucketId } = credentials
+      const authorizeResponse = await b2.authorize()
+    },
     copy: async (
       credentials: IBackblazeB2ClientCredentials,
       oldFilePath: string,
       newFilePath: string
-    ) => {},
+    ) => {
+      const b2 = new B2(credentials)
+      const { bucketId } = credentials
+      const authorizeResponse = await b2.authorize()
+    },
     listDir: async (
       credentials: IBackblazeB2ClientCredentials,
       dirPath: string,
       batchSize: number,
       iteratorCallback: () => string[]
-    ) => {},
+    ) => {
+      const b2 = new B2(credentials)
+      const { bucketId } = credentials
+      const authorizeResponse = await b2.authorize()
+    },
     remove: async (
       credentials: IBackblazeB2ClientCredentials,
       fileName: string
-    ) => {},
+    ) => {
+      const b2 = new B2(credentials)
+      const { bucketId } = credentials
+      const authorizeResponse = await b2.authorize()
+    },
     removeDir: async (
       credentials: IBackblazeB2ClientCredentials,
       dirPath: string
-    ) => {},
+    ) => {
+      const b2 = new B2(credentials)
+      const { bucketId } = credentials
+      const authorizeResponse = await b2.authorize()
+    },
     testCredentials: async (credentials: IBackblazeB2ClientCredentials) => {
       const b2 = new B2(credentials)
       const { bucketId } = credentials
