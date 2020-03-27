@@ -1,8 +1,10 @@
 import { ReadStream } from "fs"
 
 // Setup B2 with extension upload-any call
-const B2 = require("backblaze-b2")
-require("@gideo-llc/backblaze-b2-upload-any").install(B2)
+const B2 = require("@gideo-llc/backblaze-b2-upload-any").install(
+  require("backblaze-b2")
+)
+// B2.prototype.uploadAny = require("@gideo-llc/backblaze-b2-upload-any")
 
 // For additional options, see https://github.com/softonic/axios-retry
 export interface IAxiosRetryConfig {
@@ -16,123 +18,108 @@ export interface IBackblazeB2ClientCredentials {
   applicationKeyId: string
   applicationKey: string
   bucketName: string
-  bucketId?: string
+  bucketId: string
   retry?: IAxiosRetryConfig
 }
 
 export interface IBackblazeB2Client {
   upload: (
+    credentials: IBackblazeB2ClientCredentials,
     fileName: string,
-    data: Buffer | string | ReadStream,
-    credentials?: IBackblazeB2ClientCredentials
+    data: Buffer | string | ReadStream
   ) => Promise<void>
   download: (
-    filePath: string,
-    credentials?: IBackblazeB2ClientCredentials
+    credentials: IBackblazeB2ClientCredentials,
+    filePath: string
   ) => Promise<void>
   downloadDir: (
-    dirPath: string,
-    credentials?: IBackblazeB2ClientCredentials
+    credentials: IBackblazeB2ClientCredentials,
+    dirPath: string
   ) => Promise<void>
   copy: (
+    credentials: IBackblazeB2ClientCredentials,
     oldFilePath: string,
-    newFilePath: string,
-    credentials?: IBackblazeB2ClientCredentials
+    newFilePath: string
   ) => Promise<void>
   listDir: (
+    credentials: IBackblazeB2ClientCredentials,
     dirPath: string,
     batchSize: number,
-    iteratorCallback: () => string[],
-    credentials?: IBackblazeB2ClientCredentials
+    iteratorCallback: () => string[]
   ) => Promise<void>
   remove: (
-    fileName: string,
-    credentials?: IBackblazeB2ClientCredentials
+    credentials: IBackblazeB2ClientCredentials,
+    fileName: string
   ) => Promise<void>
   removeDir: (
-    dirPath: string,
-    credentials?: IBackblazeB2ClientCredentials
+    credentials: IBackblazeB2ClientCredentials,
+    dirPath: string
   ) => Promise<void>
   testCredentials: (
-    credentials?: IBackblazeB2ClientCredentials
+    credentials: IBackblazeB2ClientCredentials
   ) => Promise<boolean>
 }
 
-/** BucketId is an optional optimzation parameter in credentials, this fills it in if not included */
-const fillInCredentials = async (
-  credentials: IBackblazeB2ClientCredentials
-): Promise<IBackblazeB2ClientCredentials> => {
-  if (credentials.bucketId) {
-    return credentials
-  }
-  const b2 = new B2({ credentials })
-  b2.authorize()
-  const bucketResponse = await b2.getBucket({
-    bucketName: credentials.bucketName
-  })
-  if (bucketResponse.data.buckets.length != 1) {
-    throw new Error("Unable to get bucketId")
-  }
-  const bucketId = bucketResponse.data.buckets[0].bucketId
-  return { ...credentials, bucketId }
-}
-
-export const BackblazeB2Client = (
-  credentials: IBackblazeB2ClientCredentials
-): IBackblazeB2Client => {
-  const b2 = new B2({ credentials })
-  const cachedCredentials = credentials
-
+export const BackblazeB2Client = (): IBackblazeB2Client => {
   return {
     upload: async (
+      credentials: IBackblazeB2ClientCredentials,
       fileName: string,
-      data: Buffer | string | ReadStream,
-      credentials?: IBackblazeB2ClientCredentials
-    ) => {},
+      data: Buffer | string | ReadStream
+    ) => {
+      const b2 = new B2(credentials)
+      const { bucketId } = credentials
+      const authorizeResponse = await b2.authorize()
+      await b2.uploadAny({
+        bucketId,
+        fileName,
+        partSize: authorizeResponse.data.recommendedPartSize,
+        data
+      })
+    },
     download: async (
-      filePath: string,
-      credentials?: IBackblazeB2ClientCredentials
+      credentials: IBackblazeB2ClientCredentials,
+      filePath: string
     ) => {},
     downloadDir: async (
-      dirPath: string,
-      credentials?: IBackblazeB2ClientCredentials
+      credentials: IBackblazeB2ClientCredentials,
+      dirPath: string
     ) => {},
     copy: async (
+      credentials: IBackblazeB2ClientCredentials,
       oldFilePath: string,
-      newFilePath: string,
-      credentials?: IBackblazeB2ClientCredentials
+      newFilePath: string
     ) => {},
     listDir: async (
+      credentials: IBackblazeB2ClientCredentials,
       dirPath: string,
       batchSize: number,
-      iteratorCallback: () => string[],
-      credentials?: IBackblazeB2ClientCredentials
+      iteratorCallback: () => string[]
     ) => {},
     remove: async (
-      fileName: string,
-      credentials?: IBackblazeB2ClientCredentials
+      credentials: IBackblazeB2ClientCredentials,
+      fileName: string
     ) => {},
     removeDir: async (
-      dirPath: string,
-      credentials?: IBackblazeB2ClientCredentials
+      credentials: IBackblazeB2ClientCredentials,
+      dirPath: string
     ) => {},
-    testCredentials: async (credentials?: IBackblazeB2ClientCredentials) => {
-      const { bucketId } = await fillInCredentials(
-        credentials || cachedCredentials
-      )
+    testCredentials: async (credentials: IBackblazeB2ClientCredentials) => {
+      const b2 = new B2(credentials)
+      const { bucketId } = credentials
       const testFileName = "backblaze-b2-client-testfile"
-      const uploadResponse = await b2.authorize().then(() =>
-        b2.uploadAny({
-          bucketId,
-          fileName: testFileName,
-          data: `src/${testFileName}`
-        })
-      )
-      const deleteResponse = await b2.deleteFileVersion({
-        fileId: uploadResponse.data.fileId,
-        fileName: uploadResponse.data.fileName
+      const authorizeResponse = await b2.authorize()
+      const uploadData = await b2.uploadAny({
+        bucketId,
+        fileName: testFileName,
+        partSize: authorizeResponse.data.recommendedPartSize,
+        data: `src/${testFileName}`
       })
-      return uploadResponse.data.fileName == deleteResponse.data.fileName
+      const deleteResponse = await b2.deleteFileVersion({
+        fileId: uploadData.fileId,
+        fileName: uploadData.fileName
+      })
+      return uploadData.fileName == deleteResponse.data.fileName
     }
   }
 }

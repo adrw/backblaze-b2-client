@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git@github.com:adrw/backblaze-b2-client.git"
   },
-  "main": "src/index.js",
+  "main": "index.js",
   "files": [
     "dist"
   ],
@@ -24,12 +24,14 @@
     "connect-lastmile": "1.2.2",
     "debug": "4.1.1",
     "dotenv": "8.2.0",
+    "fs-extra": "^8.0.0",
     "lodash": "4.17.15",
     "lodash.chunk": "4.2.0",
     "underscore": "1.9.2"
   },
   "devDependencies": {
     "@misk/prettier": "0.1.26-54",
+    "@types/fs-extra": "8.0.0",
     "@types/jest": "25.1.4",
     "@types/node": "11.9.5",
     "jest": "25.2.3",
@@ -42,17 +44,13 @@
     "start": "node dist/index.js",
     "watch": "tsc -w",
     "build": "tsc",
-    "test": "jest",
+    "test": "npm run-script build && jest",
     "lint": "prettier --write --config package.json \".{/src/**/,/}*.{md,css,sass,less,json,js,jsx,ts,tsx}\"",
     "postmerge": "/bin/true",
     "precommit": "npm run-script lint",
     "prepush": "npm test"
   },
   "jest": {
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(tsx?|jsx?)$",
     "moduleFileExtensions": [
       "ts",
       "tsx",
@@ -63,6 +61,11 @@
     "moduleNameMapper": {
       "^src(.*)$": "<rootDir>/src/$1",
       "^test(.*)$": "<rootDir>/test/$1"
+    },
+    "testEnvironment": "node",
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(tsx?|jsx?)$",
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
     }
   }
 }
