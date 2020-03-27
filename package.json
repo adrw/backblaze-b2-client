@@ -30,7 +30,7 @@
     "underscore": "1.9.2"
   },
   "devDependencies": {
-    "@misk/prettier": "0.1.26-54",
+    "@misk/prettier": "0.1.26-56",
     "@types/fs-extra": "8.0.0",
     "@types/jest": "25.1.4",
     "@types/node": "11.9.5",
