@@ -1,10 +1,29 @@
 require("dotenv").config()
 import { BackblazeB2Client, IBackblazeB2ClientCredentials } from "../src"
+const B2 = require("@gideo-llc/backblaze-b2-upload-any").install(
+  require("backblaze-b2")
+)
 import * as fs from "fs-extra"
+const dayjs = require("dayjs")
+
+const testFiles = [
+  {
+    fileName: "alpha.txt",
+    filePath: "./test/fixtures/alpha.txt"
+  },
+  {
+    fileName: "bravo.txt",
+    filePath: "./test/fixtures/bravo.txt"
+  },
+  {
+    fileName: "charlie.txt",
+    filePath: "./test/fixtures/charlie.txt"
+  }
+]
 
 describe("BackblazeB2Client", () => {
   // Set longer timeout since we're actually doing network calls
-  jest.setTimeout(60000)
+  jest.setTimeout(10000)
 
   const applicationKeyId = process.env.BACKBLAZE_B2_API_KEY_ID
   expect(applicationKeyId).toBeDefined()
@@ -14,44 +33,90 @@ describe("BackblazeB2Client", () => {
   expect(bucketName).toBeDefined()
   const bucketId = process.env.BACKBLAZE_B2_BUCKET_ID
   expect(bucketId).toBeDefined()
+  const credentials = {
+    applicationKeyId,
+    applicationKey,
+    bucketName,
+    bucketId
+  } as IBackblazeB2ClientCredentials
+
+  // beforeEach(() => {
+  //   testFiles.forEach(async ({ fileName, filePath }: any) => {
+  //     const b2raw = new B2(credentials)
+  //     await b2raw.authorize()
+  //     const listResponse = await b2raw.listFileNames({
+  //       ...credentials,
+  //       startFileName: fileName,
+  //       maxFileCount: 100,
+  //       delimiter: "",
+  //       prefix: ""
+  //     })
+  //     const listedFile = listResponse.data.files.filter(
+  //       (file: any) => file.fileName == fileName
+  //     )
+  //     if (listedFile) {
+  //       await b2raw.authorize()
+  //       await b2raw.deleteFileVersion({
+  //         ...credentials,
+  //         fileName,
+  //         fileId: listedFile.fileId
+  //       })
+  //     }
+  //   })
+  // })
 
   it("testCredentials happy path", async () => {
-    const credentials = {
-      applicationKeyId,
-      applicationKey,
-      bucketName,
-      bucketId
-    } as IBackblazeB2ClientCredentials
-
     const b2 = BackblazeB2Client()
     expect(await b2.testCredentials(credentials)).toBeTruthy()
   })
 
   it("upload filepath", async () => {
-    const credentials = {
-      applicationKeyId,
-      applicationKey,
-      bucketName,
-      bucketId
-    } as IBackblazeB2ClientCredentials
+    const datePrefix = dayjs().format("YYYY-MM-DDTHH:mm:ss")
+    const testFile = testFiles[0]
+    const fileName = `${datePrefix}-${testFile.fileName}`
 
     const b2 = BackblazeB2Client()
-    await b2.upload(credentials, "alpha.txt", "./test/fixtures/alpha.txt")
+    await b2.upload(credentials, fileName, testFile.filePath)
+
+    const b2raw = new B2(credentials)
+    await b2raw.authorize()
+    const listResponse = await b2raw.listFileNames({
+      ...credentials,
+      startFileName: fileName,
+      maxFileCount: 100,
+      delimiter: "",
+      prefix: ""
+    })
+    const file = listResponse.data.files.filter(
+      (file: any) => file.fileName == fileName
+    )
+    expect(file).toBeDefined()
   })
 
   it("upload stream", async () => {
-    const credentials = {
-      applicationKeyId,
-      applicationKey,
-      bucketName,
-      bucketId
-    } as IBackblazeB2ClientCredentials
+    const datePrefix = dayjs().format("YYYY-MM-DDTHH:mm:ss")
+    const testFile = testFiles[1]
+    const fileName = `${datePrefix}-${testFile.fileName}`
 
     const b2 = BackblazeB2Client()
     await b2.upload(
       credentials,
-      "bravo.txt",
-      fs.createReadStream("./test/fixtures/bravo.txt")
+      fileName,
+      fs.createReadStream(testFile.filePath)
     )
+
+    const b2raw = new B2(credentials)
+    await b2raw.authorize()
+    const listResponse = await b2raw.listFileNames({
+      ...credentials,
+      startFileName: fileName,
+      maxFileCount: 100,
+      delimiter: "",
+      prefix: ""
+    })
+    const file = listResponse.data.files.filter(
+      (file: any) => file.fileName == fileName
+    )
+    expect(file).toBeDefined()
   })
 })
