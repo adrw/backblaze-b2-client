@@ -9,7 +9,7 @@ See the examples directory for integration samples. The directory includes an ex
 ## Plan
 
 - [x] Copy over Cloudron storage interface
-- [ ] Use [yakovkhalinsky/backblaze-b2](https://github.com/yakovkhalinsky/backblaze-b2) client to implement B2 interface (with inspiration from other users of the library)
+- [ ] Use [yakovkhalinsky/backblaze-b2](https://github.com/yakovkhalinsky/backblaze-b2) and [gideo-llc/backblaze-b2-upload-any](https://github.com/gideo-llc/backblaze-b2-upload-any) client to implement B2 interface (with inspiration from other users of the library)
   - [gnalck/ghost-storage-b2](https://github.com/gnalck/ghost-storage-b2/blob/master/index.js)
   - [UbuntuOpenStore/openstore-api](https://github.com/UbuntuOpenStore/openstore-api/blob/919c8c3c29e5f8a4764f2aa9514f43d6bacc3462/src/utils/upload.js)
 - [x] Publish on NPM
