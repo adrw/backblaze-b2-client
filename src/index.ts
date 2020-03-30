@@ -1,1 +1,2 @@
-export * from "./backblaze-b2-client"
+export * from "./b2-api"
+export * from "./b2-client"

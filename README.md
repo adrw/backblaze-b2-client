@@ -1,10 +1,10 @@
-# Backblaze B2 Client
+# Backblaze B2 Typescript Node.js Client Library
 
-A thicker client for Backblaze B2 that includes `fs` to handle uploads and extensible error handling for easier integration with other platforms.
+A thicker client for Backblaze B2 that includes the raw API as well as abstracted functions that provide richer client experince without having to think through every individual API call.
 
-`backblaze-b2-client` [NPM](https://www.npmjs.com/package/backblaze-b2-client)
+[![npm](https://img.shields.io/npm/v/backblaze-b2-client.svg?label=backblaze-b2-client)](https://www.npmjs.com/package/backblaze-b2-client)
 
-See the examples directory for integration samples. The directory includes an example implementation of Cloudron storage interface to support Backblaze B2.
+See the examples directory for integration samples including an example implementation of Cloudron storage interface to support Backblaze B2.
 
 ## Plan
 
