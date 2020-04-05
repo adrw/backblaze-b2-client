@@ -1,5 +1,5 @@
 require("dotenv").config()
-import { BackblazeB2Client, IBackblazeB2ClientCredentials } from "../src"
+import { B2Client, IB2ClientConfig } from "../src"
 const B2 = require("@gideo-llc/backblaze-b2-upload-any").install(
   require("backblaze-b2")
 )
@@ -33,20 +33,20 @@ describe("BackblazeB2Client", () => {
   expect(bucketName).toBeDefined()
   const bucketId = process.env.BACKBLAZE_B2_BUCKET_ID
   expect(bucketId).toBeDefined()
-  const credentials = {
+  const config = {
     applicationKeyId,
     applicationKey,
     bucketName,
     bucketId
-  } as IBackblazeB2ClientCredentials
+  } as IB2ClientConfig
 
   // TODO add per test cleanup of uploaded test files
   // beforeEach(() => {
   //   testFiles.forEach(async ({ fileName, filePath }: any) => {
-  //     const b2raw = new B2(credentials)
+  //     const b2raw = new B2(config)
   //     await b2raw.authorize()
   //     const listResponse = await b2raw.listFileNames({
-  //       ...credentials,
+  //       ...config,
   //       startFileName: fileName,
   //       maxFileCount: 100,
   //       delimiter: "",
@@ -58,7 +58,7 @@ describe("BackblazeB2Client", () => {
   //     if (listedFile) {
   //       await b2raw.authorize()
   //       await b2raw.deleteFileVersion({
-  //         ...credentials,
+  //         ...config,
   //         fileName,
   //         fileId: listedFile.fileId
   //       })
@@ -66,9 +66,9 @@ describe("BackblazeB2Client", () => {
   //   })
   // })
 
-  it("testCredentials happy path", async () => {
-    const b2 = BackblazeB2Client()
-    expect(await b2.testCredentials(credentials)).toBeTruthy()
+  it("testconfig happy path", async () => {
+    const b2 = B2Client()
+    expect(await b2.testconfig(config)).toBeTruthy()
   })
 
   it("upload filepath", async () => {
@@ -76,13 +76,13 @@ describe("BackblazeB2Client", () => {
     const testFile = testFiles[0]
     const fileName = `${datePrefix}-${testFile.fileName}`
 
-    const b2 = BackblazeB2Client()
-    await b2.upload(credentials, fileName, testFile.filePath)
+    const b2 = B2Client()
+    await b2.upload(config, fileName, testFile.filePath)
 
-    const b2raw = new B2(credentials)
+    const b2raw = new B2(config)
     await b2raw.authorize()
     const listResponse = await b2raw.listFileNames({
-      ...credentials,
+      ...config,
       startFileName: fileName,
       maxFileCount: 100,
       delimiter: "",
@@ -99,17 +99,13 @@ describe("BackblazeB2Client", () => {
     const testFile = testFiles[1]
     const fileName = `${datePrefix}-${testFile.fileName}`
 
-    const b2 = BackblazeB2Client()
-    await b2.upload(
-      credentials,
-      fileName,
-      fs.createReadStream(testFile.filePath)
-    )
+    const b2 = B2Client()
+    await b2.upload(config, fileName, fs.createReadStream(testFile.filePath))
 
-    const b2raw = new B2(credentials)
+    const b2raw = new B2(config)
     await b2raw.authorize()
     const listResponse = await b2raw.listFileNames({
-      ...credentials,
+      ...config,
       startFileName: fileName,
       maxFileCount: 100,
       delimiter: "",
@@ -126,15 +122,15 @@ describe("BackblazeB2Client", () => {
     const testFile = testFiles[0]
     const fileName = `${datePrefix}-${testFile.fileName}`
 
-    const b2 = BackblazeB2Client()
-    await b2.upload(credentials, fileName, testFile.filePath)
+    const b2 = B2Client()
+    await b2.upload(config, fileName, testFile.filePath)
 
-    await b2.remove(credentials, fileName)
+    await b2.remove(config, fileName)
 
-    const b2raw = new B2(credentials)
+    const b2raw = new B2(config)
     await b2raw.authorize()
     const listResponse = await b2raw.listFileNames({
-      ...credentials,
+      ...config,
       startFileName: fileName,
       maxFileCount: 100,
       delimiter: "",

@@ -1,4 +1,5 @@
 import { ReadStream } from "fs"
+import { IB2ApiConfig } from "./api"
 
 // Setup B2 with extension upload-any call
 const B2 = require("@gideo-llc/backblaze-b2-upload-any").install(
@@ -6,69 +7,41 @@ const B2 = require("@gideo-llc/backblaze-b2-upload-any").install(
 )
 // B2.prototype.uploadAny = require("@gideo-llc/backblaze-b2-upload-any")
 
-// For additional options, see https://github.com/softonic/axios-retry
-export interface IAxiosRetryConfig {
-  retry: {
-    retries: number
-    retryDelay: (retryCount: number, error: any) => number
-  }
-}
+export interface IB2ClientConfig extends IB2ApiConfig {}
 
-export interface IBackblazeB2ClientCredentials {
-  applicationKeyId: string
-  applicationKey: string
-  bucketName: string
-  bucketId: string
-  retry?: IAxiosRetryConfig
-}
-
-export interface IBackblazeB2Client {
+export interface IB2Client {
   upload: (
-    credentials: IBackblazeB2ClientCredentials,
+    config: IB2ClientConfig,
     fileName: string,
     data: Buffer | string | ReadStream
   ) => Promise<void>
-  download: (
-    credentials: IBackblazeB2ClientCredentials,
-    filePath: string
-  ) => Promise<void>
-  downloadDir: (
-    credentials: IBackblazeB2ClientCredentials,
-    dirPath: string
-  ) => Promise<void>
+  download: (config: IB2ClientConfig, filePath: string) => Promise<void>
+  downloadDir: (config: IB2ClientConfig, dirPath: string) => Promise<void>
   copy: (
-    credentials: IBackblazeB2ClientCredentials,
+    config: IB2ClientConfig,
     oldFilePath: string,
     newFilePath: string
   ) => Promise<void>
   listDir: (
-    credentials: IBackblazeB2ClientCredentials,
+    config: IB2ClientConfig,
     dirPath: string,
     batchSize: number,
     iteratorCallback: () => string[]
   ) => Promise<void>
-  remove: (
-    credentials: IBackblazeB2ClientCredentials,
-    fileName: string
-  ) => Promise<void>
-  removeDir: (
-    credentials: IBackblazeB2ClientCredentials,
-    dirPath: string
-  ) => Promise<void>
-  testCredentials: (
-    credentials: IBackblazeB2ClientCredentials
-  ) => Promise<boolean>
+  remove: (config: IB2ClientConfig, fileName: string) => Promise<void>
+  removeDir: (config: IB2ClientConfig, dirPath: string) => Promise<void>
+  testconfig: (config: IB2ClientConfig) => Promise<boolean>
 }
 
-export const BackblazeB2Client = (): IBackblazeB2Client => {
+export const B2Client = (): IB2Client => {
   return {
     upload: async (
-      credentials: IBackblazeB2ClientCredentials,
+      config: IB2ClientConfig,
       fileName: string,
       data: Buffer | string | ReadStream
     ) => {
-      const b2 = new B2(credentials)
-      const { bucketId } = credentials
+      const b2 = new B2(config)
+      const { bucketId } = config
       const authorizeResponse = await b2.authorize()
       await b2.uploadAny({
         bucketId,
@@ -77,47 +50,38 @@ export const BackblazeB2Client = (): IBackblazeB2Client => {
         data
       })
     },
-    download: async (
-      credentials: IBackblazeB2ClientCredentials,
-      filePath: string
-    ) => {
-      const b2 = new B2(credentials)
-      const { bucketId } = credentials
+    download: async (config: IB2ClientConfig, filePath: string) => {
+      const b2 = new B2(config)
+      const { bucketId } = config
       const authorizeResponse = await b2.authorize()
     },
-    downloadDir: async (
-      credentials: IBackblazeB2ClientCredentials,
-      dirPath: string
-    ) => {
-      const b2 = new B2(credentials)
-      const { bucketId } = credentials
+    downloadDir: async (config: IB2ClientConfig, dirPath: string) => {
+      const b2 = new B2(config)
+      const { bucketId } = config
       const authorizeResponse = await b2.authorize()
     },
     copy: async (
-      credentials: IBackblazeB2ClientCredentials,
+      config: IB2ClientConfig,
       oldFilePath: string,
       newFilePath: string
     ) => {
-      const b2 = new B2(credentials)
-      const { bucketId } = credentials
+      const b2 = new B2(config)
+      const { bucketId } = config
       const authorizeResponse = await b2.authorize()
     },
     listDir: async (
-      credentials: IBackblazeB2ClientCredentials,
+      config: IB2ClientConfig,
       dirPath: string,
       batchSize: number,
       iteratorCallback: () => string[]
     ) => {
-      const b2 = new B2(credentials)
-      const { bucketId } = credentials
+      const b2 = new B2(config)
+      const { bucketId } = config
       const authorizeResponse = await b2.authorize()
     },
-    remove: async (
-      credentials: IBackblazeB2ClientCredentials,
-      fileName: string
-    ) => {
-      const b2 = new B2(credentials)
-      const { bucketId } = credentials
+    remove: async (config: IB2ClientConfig, fileName: string) => {
+      const b2 = new B2(config)
+      const { bucketId } = config
       await b2.authorize()
 
       try {
@@ -148,17 +112,14 @@ export const BackblazeB2Client = (): IBackblazeB2Client => {
         }
       }
     },
-    removeDir: async (
-      credentials: IBackblazeB2ClientCredentials,
-      dirPath: string
-    ) => {
-      const b2 = new B2(credentials)
-      const { bucketId } = credentials
+    removeDir: async (config: IB2ClientConfig, dirPath: string) => {
+      const b2 = new B2(config)
+      const { bucketId } = config
       const authorizeResponse = await b2.authorize()
     },
-    testCredentials: async (credentials: IBackblazeB2ClientCredentials) => {
-      const b2 = new B2(credentials)
-      const { bucketId } = credentials
+    testconfig: async (config: IB2ClientConfig) => {
+      const b2 = new B2(config)
+      const { bucketId } = config
       const testFileName = "backblaze-b2-client-testfile"
       const authorizeResponse = await b2.authorize()
       const uploadData = await b2.uploadAny({
