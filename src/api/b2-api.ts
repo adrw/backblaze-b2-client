@@ -1,9 +1,12 @@
-import axios, { AxiosInstance } from "axios"
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios"
 import axiosRetry from "axios-retry"
 const B2 = require("backblaze-b2")
+const sha1 = (value: any) =>
+  require("crypto").createHash("sha1").update(value).digest("hex")
 import { IBackblazeB2Lib } from "./backblaze-b2-shim/types"
 import { getUrlEncodedFileName } from "./backblaze-b2-shim/cache/utils"
 import { addInfoHeaders } from "./backblaze-b2-shim/cache/headers"
+import { B2ApiEndpoints } from "./backblaze-b2-shim/cache/endpoints"
 
 // TODO add any missing B2 API here and types wrapping the backblaze-b2 library calls
 
@@ -123,19 +126,55 @@ export class B2Api {
   /**
    * B2 copyFile
    */
-  public copyFile = (
-    sourceFileId: string,
-    fileName: string,
-    metadataDirective: B2CopyFileMetadataDirective,
-    destinationBucketId?: string,
+  public copyFile = async ({
+    sourceFileId,
+    fileName,
+    metadataDirective,
+    destinationBucketId,
+    rangeByteStart,
+    rangeByteEnd,
+    contentType,
+    fileInfo
+  }: {
+    sourceFileId: string
+    fileName: string
+    metadataDirective: B2CopyFileMetadataDirective
+    destinationBucketId?: string
     // use to build range: string. example: "bytes=1000-2000"
-    rangeByteStart?: number,
-    rangeByteEnd?: number,
-    contentType?: string, // use "b2/x-auto" by default
+    rangeByteStart?: number
+    rangeByteEnd?: number
+    contentType?: string // use "b2/x-auto" by default
     fileInfo?: object // optional additional key/value file metadata
-  ): IB2ApiCopyFile200Response => {
-    const options = {}
-    const response = this.axiosClient()
+  }): IB2ApiCopyFile200Response => {
+    const isReplace = metadataDirective == B2CopyFileMetadataDirective.REPLACE
+    const standardOptions = {
+      sourceFileId,
+      metadataDirective,
+      destinationBucketId,
+      fileName: getUrlEncodedFileName(fileName)
+    }
+    const contentTypeOptions = isReplace
+      ? {}
+      : { contentType: contentType || "b2/x-auto" }
+    const fileInfoOptions = isReplace ? {} : { fileInfo }
+    const rangeOptions =
+      rangeByteStart && rangeByteEnd
+        ? {}
+        : { range: `bytes=${rangeByteStart}-${rangeByteEnd}` }
+    const options = {
+      url: B2ApiEndpoints(this.rawB2).copyFile,
+      method: "POST",
+      headers: {
+        Authorization:
+          this.rawB2.authorizationToken ||
+          (this.rawB2.authorize() && this.rawB2.authorizationToken)
+      },
+      ...standardOptions,
+      ...rangeOptions,
+      ...contentTypeOptions,
+      ...fileInfoOptions
+    } as AxiosRequestConfig
+    const response = await this.axiosClient.request(options)
   }
 
   // ...
