@@ -2,6 +2,8 @@ import axios, { AxiosInstance } from "axios"
 import axiosRetry from "axios-retry"
 const B2 = require("backblaze-b2")
 import { IBackblazeB2Lib } from "./backblaze-b2-shim/types"
+import { getUrlEncodedFileName } from "./backblaze-b2-shim/cache/utils"
+import { addInfoHeaders } from "./backblaze-b2-shim/cache/headers"
 
 // TODO add any missing B2 API here and types wrapping the backblaze-b2 library calls
 
@@ -29,18 +31,25 @@ export interface IB2ApiConfig extends IBackblazeB2Lib {
   bucketId: string
 }
 
+export interface IB2ApiRequest {
+  axios?: AxiosInstance
+  axiosOverrides?: object
+}
+
+export interface IB2ApiCopyFileRequest extends IB2ApiRequest {
+  sourceFileId: string
+  fileName: string
+  metadataDirective: B2CopyFileMetadataDirective
+  destinationBucketId?: string
+  // use to build range: string. example: "bytes=1000-2000"
+  rangeByteStart?: number
+  rangeByteEnd?: number
+  contentType?: string // use "b2/x-auto" by default
+  fileInfo?: object // optional additional key/value file metadata
+}
+
 export interface IB2Api {
-  copyFile: (
-    sourceFileId: string,
-    fileName: string,
-    metadataDirective: B2CopyFileMetadataDirective,
-    destinationBucketId?: string,
-    // use to build range: string. example: "bytes=1000-2000"
-    rangeByteStart?: number,
-    rangeByteEnd?: number,
-    contentType?: string, // use "b2/x-auto" by default
-    fileInfo?: object // optional additional key/value file metadata
-  ) => IB2ApiCopyFile200Response
+  copyFile: (request: IB2ApiCopyFileRequest) => IB2ApiCopyFile200Response
 }
 
 export class B2Api {
@@ -77,6 +86,40 @@ export class B2Api {
     axiosRetry(this.axiosClient, { retries: 3, ...config.retry })
   }
 
+  public uploadFile = (args: any) => {
+    const uploadUrl = args.uploadUrl
+    const uploadAuthToken = args.uploadAuthToken
+    // Previous versions used filename (lowercase), so support that here
+    const fileName = getUrlEncodedFileName(args.fileName || args.filename)
+    const data = args.data
+    const hash = args.hash
+    const info = args.info
+    const mime = args.mime
+    const len = args.contentLength || data.byteLength || data.length
+
+    const options = {
+      url: uploadUrl,
+      method: "POST",
+      headers: {
+        Authorization: uploadAuthToken,
+        "Content-Type": mime || "b2/x-auto",
+        "Content-Length": len,
+        "X-Bz-File-Name": fileName,
+        "X-Bz-Content-Sha1": hash || (data ? sha1(data) : null)
+      },
+      data: data,
+      maxRedirects: 0,
+      onUploadProgress: args.onUploadProgress || null
+    }
+
+    addInfoHeaders(options, info)
+    // merge order matters here: later objects override earlier objects
+    return (args.axios || this.axiosClient)({
+      ...options,
+      ...args.axiosOverride
+    })
+  }
+
   /**
    * B2 copyFile
    */
@@ -91,9 +134,7 @@ export class B2Api {
     contentType?: string, // use "b2/x-auto" by default
     fileInfo?: object // optional additional key/value file metadata
   ): IB2ApiCopyFile200Response => {
-    const options = {
-      
-    }
+    const options = {}
     const response = this.axiosClient()
   }
 
