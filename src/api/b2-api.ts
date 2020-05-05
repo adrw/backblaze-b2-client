@@ -2,7 +2,10 @@ import axios, { AxiosInstance, AxiosRequestConfig } from "axios"
 import axiosRetry from "axios-retry"
 const B2 = require("backblaze-b2")
 const sha1 = (value: any) =>
-  require("crypto").createHash("sha1").update(value).digest("hex")
+  require("crypto")
+    .createHash("sha1")
+    .update(value)
+    .digest("hex")
 import { IBackblazeB2Lib } from "./backblaze-b2-shim/types"
 import { getUrlEncodedFileName } from "./backblaze-b2-shim/cache/utils"
 import { addInfoHeaders } from "./backblaze-b2-shim/cache/headers"
@@ -145,7 +148,7 @@ export class B2Api {
     rangeByteEnd?: number
     contentType?: string // use "b2/x-auto" by default
     fileInfo?: object // optional additional key/value file metadata
-  }): IB2ApiCopyFile200Response => {
+  }): Promise<IB2ApiCopyFile200Response> => {
     const isReplace = metadataDirective == B2CopyFileMetadataDirective.REPLACE
     const standardOptions = {
       sourceFileId,
@@ -174,10 +177,10 @@ export class B2Api {
       ...contentTypeOptions,
       ...fileInfoOptions
     } as AxiosRequestConfig
-    const response = await this.axiosClient.request(options)
+    let response: IB2ApiCopyFile200Response
+    response = await this.axiosClient.request(options)
+    return response
   }
-
-  // ...
 }
 
 // = (): IB2Api => {

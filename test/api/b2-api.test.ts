@@ -1,10 +1,10 @@
 require("dotenv").config()
-import { B2Client, IB2ClientConfig } from "../src"
+import { B2Api, IB2ApiConfig, IB2ApiCopyFileRequest } from "../../src"
 const B2 = require("@gideo-llc/backblaze-b2-upload-any").install(
   require("backblaze-b2")
 )
 import * as fs from "fs-extra"
-import { testFixtures } from "./fixtures"
+import { testFixtures } from "../fixtures"
 const dayjs = require("dayjs")
 
 describe("BackblazeB2Client", () => {
@@ -24,7 +24,7 @@ describe("BackblazeB2Client", () => {
     applicationKey,
     bucketName,
     bucketId
-  } as IB2ClientConfig
+  } as IB2ApiConfig
 
   // TODO add per test cleanup of uploaded test files
   // beforeEach(() => {
@@ -52,18 +52,17 @@ describe("BackblazeB2Client", () => {
   //   })
   // })
 
-  it("testconfig happy path", async () => {
-    const b2 = B2Client()
-    expect(await b2.testconfig(config)).toBeTruthy()
-  })
-
   it("upload filepath", async () => {
     const datePrefix = dayjs().format("YYYY-MM-DDTHH:mm:ss")
     const testFile = testFixtures[0]
     const fileName = `${datePrefix}-${testFile.fileName}`
 
-    const b2 = B2Client()
-    await b2.upload(config, fileName, testFile.filePath)
+    const b2 = new B2Api(config)
+    const copyFileOptions: IB2ApiCopyFileRequest = {
+      sourceFileId,
+      
+    }
+    await b2.copyFile()
 
     const b2raw = new B2(config)
     await b2raw.authorize()
@@ -79,52 +78,4 @@ describe("BackblazeB2Client", () => {
     )
     expect(file).toBeDefined()
   })
-
-  it("upload stream", async () => {
-    const datePrefix = dayjs().format("YYYY-MM-DDTHH:mm:ss")
-    const testFile = testFixtures[1]
-    const fileName = `${datePrefix}-${testFile.fileName}`
-
-    const b2 = B2Client()
-    await b2.upload(config, fileName, fs.createReadStream(testFile.filePath))
-
-    const b2raw = new B2(config)
-    await b2raw.authorize()
-    const listResponse = await b2raw.listFileNames({
-      ...config,
-      startFileName: fileName,
-      maxFileCount: 100,
-      delimiter: "",
-      prefix: ""
-    })
-    const files = listResponse.data.files.filter(
-      (file: any) => file.fileName == fileName
-    )
-    expect(files).toHaveLength(1)
-  })
-
-  it("remove happy path", async () => {
-    const datePrefix = dayjs().format("YYYY-MM-DDTHH:mm:ss")
-    const testFile = testFixtures[0]
-    const fileName = `${datePrefix}-${testFile.fileName}`
-
-    const b2 = B2Client()
-    await b2.upload(config, fileName, testFile.filePath)
-
-    await b2.remove(config, fileName)
-
-    const b2raw = new B2(config)
-    await b2raw.authorize()
-    const listResponse = await b2raw.listFileNames({
-      ...config,
-      startFileName: fileName,
-      maxFileCount: 100,
-      delimiter: "",
-      prefix: ""
-    })
-    const files = listResponse.data.files.filter(
-      (file: any) => file.fileName == fileName
-    )
-    expect(files).toHaveLength(0)
-  })
-})
+)
