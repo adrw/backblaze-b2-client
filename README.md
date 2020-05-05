@@ -1,3 +1,11 @@
+# 2020-05-04 Update: Active Development Stopped
+
+[Backblaze announced today an S3 compatible API for B2 cloud storage](https://www.backblaze.com/blog/backblaze-b2-s3-compatible-api/), the lack thereof was the primary motivation for this project. Since their new S3 compatible API is robust and working great for my Cloudron instance, I won't be continuing work on this repo.
+
+Anyone else is free to fork or contribute as they see fit.
+
+- adrw
+
 # Backblaze B2 Typescript Node.js Client Library
 
 A thicker client for Backblaze B2 that includes the raw API as well as abstracted functions that provide richer client experince without having to think through every individual API call.
