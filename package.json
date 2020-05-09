@@ -40,7 +40,7 @@
     "dayjs": "1.8.26",
     "jest": "26.0.1",
     "tslib": "1.11.2",
-    "ts-jest": "25.5.0",
+    "ts-jest": "25.5.1",
     "typescript": "3.8.3"
   },
   "prettier": {
