@@ -35,7 +35,7 @@
   "devDependencies": {
     "@misk/prettier": "0.1.26-62",
     "@types/fs-extra": "8.1.0",
-    "@types/jest": "25.2.1",
+    "@types/jest": "25.2.2",
     "@types/node": "11.9.5",
     "dayjs": "1.8.26",
     "jest": "26.0.1",
