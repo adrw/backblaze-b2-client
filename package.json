@@ -30,7 +30,7 @@
     "fs-extra": "^9.0.0",
     "lodash": "4.17.20",
     "lodash.chunk": "4.2.0",
-    "underscore": "1.10.1"
+    "underscore": "1.11.0"
   },
   "devDependencies": {
     "@misk/prettier": "0.1.26",
