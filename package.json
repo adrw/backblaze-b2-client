@@ -37,7 +37,7 @@
     "@types/fs-extra": "9.0.1",
     "@types/jest": "26.0.12",
     "@types/node": "11.9.5",
-    "dayjs": "1.8.34",
+    "dayjs": "1.8.35",
     "jest": "26.4.2",
     "tslib": "2.0.1",
     "ts-jest": "26.3.0",
